@@ -1,0 +1,333 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BB0C0C541CF82FC100EF51B2 /* PickerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0C0C531CF82FC100EF51B2 /* PickerTableViewCell.swift */; };
+		BB0C0C561CF8C05B00EF51B2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0C0C551CF8C05B00EF51B2 /* ViewController.swift */; };
+		BB0C0C581CF8C31300EF51B2 /* PickerTransitionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0C0C571CF8C31300EF51B2 /* PickerTransitionDelegate.swift */; };
+		BB5D90411CF6994A0095F9CA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5D90401CF6994A0095F9CA /* AppDelegate.swift */; };
+		BB5D90431CF6994A0095F9CA /* PickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5D90421CF6994A0095F9CA /* PickerViewController.swift */; };
+		BB5D90461CF6994A0095F9CA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BB5D90441CF6994A0095F9CA /* Main.storyboard */; };
+		BB5D90481CF6994A0095F9CA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB5D90471CF6994A0095F9CA /* Assets.xcassets */; };
+		BB5D904B1CF6994A0095F9CA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BB5D90491CF6994A0095F9CA /* LaunchScreen.storyboard */; };
+		BB5D90531CF6D2750095F9CA /* PickerBadgeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5D90521CF6D2750095F9CA /* PickerBadgeCell.swift */; };
+		BB5D90551CF6D5820095F9CA /* PickerLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5D90541CF6D5820095F9CA /* PickerLayout.swift */; };
+		BB5D90571CF71FFA0095F9CA /* PickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5D90561CF71FFA0095F9CA /* PickerCell.swift */; };
+		BB5D90591CF7447B0095F9CA /* PickerCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5D90581CF7447B0095F9CA /* PickerCollectionView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		BB0C0C531CF82FC100EF51B2 /* PickerTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerTableViewCell.swift; sourceTree = "<group>"; };
+		BB0C0C551CF8C05B00EF51B2 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		BB0C0C571CF8C31300EF51B2 /* PickerTransitionDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerTransitionDelegate.swift; sourceTree = "<group>"; };
+		BB5D903D1CF6994A0095F9CA /* WYPhotoPicker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WYPhotoPicker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB5D90401CF6994A0095F9CA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		BB5D90421CF6994A0095F9CA /* PickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewController.swift; sourceTree = "<group>"; };
+		BB5D90451CF6994A0095F9CA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		BB5D90471CF6994A0095F9CA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BB5D904A1CF6994A0095F9CA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		BB5D904C1CF6994A0095F9CA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BB5D90521CF6D2750095F9CA /* PickerBadgeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerBadgeCell.swift; sourceTree = "<group>"; };
+		BB5D90541CF6D5820095F9CA /* PickerLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerLayout.swift; sourceTree = "<group>"; };
+		BB5D90561CF71FFA0095F9CA /* PickerCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerCell.swift; sourceTree = "<group>"; };
+		BB5D90581CF7447B0095F9CA /* PickerCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerCollectionView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BB5D903A1CF6994A0095F9CA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BB0C0C591CF9523200EF51B2 /* WYPhotoPicker */ = {
+			isa = PBXGroup;
+			children = (
+				BB5D90421CF6994A0095F9CA /* PickerViewController.swift */,
+				BB5D90561CF71FFA0095F9CA /* PickerCell.swift */,
+				BB5D90581CF7447B0095F9CA /* PickerCollectionView.swift */,
+				BB0C0C531CF82FC100EF51B2 /* PickerTableViewCell.swift */,
+				BB0C0C571CF8C31300EF51B2 /* PickerTransitionDelegate.swift */,
+				BB5D90521CF6D2750095F9CA /* PickerBadgeCell.swift */,
+				BB5D90541CF6D5820095F9CA /* PickerLayout.swift */,
+			);
+			name = WYPhotoPicker;
+			sourceTree = "<group>";
+		};
+		BB5D90341CF6994A0095F9CA = {
+			isa = PBXGroup;
+			children = (
+				BB5D903F1CF6994A0095F9CA /* WYPhotoPicker */,
+				BB5D903E1CF6994A0095F9CA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BB5D903E1CF6994A0095F9CA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BB5D903D1CF6994A0095F9CA /* WYPhotoPicker.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BB5D903F1CF6994A0095F9CA /* WYPhotoPicker */ = {
+			isa = PBXGroup;
+			children = (
+				BB0C0C591CF9523200EF51B2 /* WYPhotoPicker */,
+				BB0C0C551CF8C05B00EF51B2 /* ViewController.swift */,
+				BB5D90401CF6994A0095F9CA /* AppDelegate.swift */,
+				BB5D90471CF6994A0095F9CA /* Assets.xcassets */,
+				BB5D90441CF6994A0095F9CA /* Main.storyboard */,
+				BB5D90491CF6994A0095F9CA /* LaunchScreen.storyboard */,
+				BB5D904C1CF6994A0095F9CA /* Info.plist */,
+			);
+			path = WYPhotoPicker;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BB5D903C1CF6994A0095F9CA /* WYPhotoPicker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB5D904F1CF6994A0095F9CA /* Build configuration list for PBXNativeTarget "WYPhotoPicker" */;
+			buildPhases = (
+				BB5D90391CF6994A0095F9CA /* Sources */,
+				BB5D903A1CF6994A0095F9CA /* Frameworks */,
+				BB5D903B1CF6994A0095F9CA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WYPhotoPicker;
+			productName = WYPhotoPicker;
+			productReference = BB5D903D1CF6994A0095F9CA /* WYPhotoPicker.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BB5D90351CF6994A0095F9CA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0730;
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = Josscii;
+				TargetAttributes = {
+					BB5D903C1CF6994A0095F9CA = {
+						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = 8ZXMZHX876;
+					};
+				};
+			};
+			buildConfigurationList = BB5D90381CF6994A0095F9CA /* Build configuration list for PBXProject "WYPhotoPicker" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BB5D90341CF6994A0095F9CA;
+			productRefGroup = BB5D903E1CF6994A0095F9CA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BB5D903C1CF6994A0095F9CA /* WYPhotoPicker */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BB5D903B1CF6994A0095F9CA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB5D904B1CF6994A0095F9CA /* LaunchScreen.storyboard in Resources */,
+				BB5D90481CF6994A0095F9CA /* Assets.xcassets in Resources */,
+				BB5D90461CF6994A0095F9CA /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BB5D90391CF6994A0095F9CA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB0C0C541CF82FC100EF51B2 /* PickerTableViewCell.swift in Sources */,
+				BB5D90591CF7447B0095F9CA /* PickerCollectionView.swift in Sources */,
+				BB0C0C561CF8C05B00EF51B2 /* ViewController.swift in Sources */,
+				BB5D90531CF6D2750095F9CA /* PickerBadgeCell.swift in Sources */,
+				BB5D90551CF6D5820095F9CA /* PickerLayout.swift in Sources */,
+				BB0C0C581CF8C31300EF51B2 /* PickerTransitionDelegate.swift in Sources */,
+				BB5D90431CF6994A0095F9CA /* PickerViewController.swift in Sources */,
+				BB5D90411CF6994A0095F9CA /* AppDelegate.swift in Sources */,
+				BB5D90571CF71FFA0095F9CA /* PickerCell.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		BB5D90441CF6994A0095F9CA /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BB5D90451CF6994A0095F9CA /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		BB5D90491CF6994A0095F9CA /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BB5D904A1CF6994A0095F9CA /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		BB5D904D1CF6994A0095F9CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BB5D904E1CF6994A0095F9CA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BB5D90501CF6994A0095F9CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = WYPhotoPicker/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.josscii.WYPhotoPicker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		BB5D90511CF6994A0095F9CA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = WYPhotoPicker/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.josscii.WYPhotoPicker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BB5D90381CF6994A0095F9CA /* Build configuration list for PBXProject "WYPhotoPicker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB5D904D1CF6994A0095F9CA /* Debug */,
+				BB5D904E1CF6994A0095F9CA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BB5D904F1CF6994A0095F9CA /* Build configuration list for PBXNativeTarget "WYPhotoPicker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB5D90501CF6994A0095F9CA /* Debug */,
+				BB5D90511CF6994A0095F9CA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BB5D90351CF6994A0095F9CA /* Project object */;
+}
