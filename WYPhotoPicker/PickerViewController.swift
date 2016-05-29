@@ -13,7 +13,7 @@ let screenWidth = UIScreen.mainScreen().bounds.width
 let viewModeSize = CGSize(width: 86, height: 129)
 let selectionModeSize = CGSize(width: screenWidth/2, height: 232.5)
 
-protocol PickerPhotoDelegate {
+protocol PickerPhotoDelegate:class {
     func didSelectImages(images: [UIImage])
 }
 
@@ -25,7 +25,7 @@ class PickerViewController: UIViewController {
     var assets = [PHAsset]()
     var photos = [UIImage?]()
     
-    var delegate: PickerPhotoDelegate?
+    weak var delegate: PickerPhotoDelegate?
     
     var transitionDelegate: PickerTransitionDelegate?
     
@@ -41,7 +41,7 @@ class PickerViewController: UIViewController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -117,22 +117,40 @@ class PickerViewController: UIViewController {
     }
     
     func fetchAllPhotos() {
-        let albums = PHAssetCollection.fetchAssetCollectionsWithType(.SmartAlbum, subtype: .SmartAlbumUserLibrary, options: nil)
-        guard let rec = albums.firstObject as? PHAssetCollection else { return }
-        let options = PHFetchOptions()
-        let pred = NSPredicate(format: "mediaType = %@", NSNumber(integer:PHAssetMediaType.Image.rawValue))
-        options.predicate = pred
-        
-        let results = PHAsset.fetchAssetsInAssetCollection(rec, options: options)
-        
-        results.enumerateObjectsUsingBlock { result, index, _ in
-            let asset = result as! PHAsset
-            self.assets.insert(asset, atIndex: 0)
+        PHPhotoLibrary.requestAuthorization { status in
+            switch status {
+            case .Authorized:
+                let albums = PHAssetCollection.fetchAssetCollectionsWithType(.SmartAlbum, subtype: .SmartAlbumUserLibrary, options: nil)
+                guard let rec = albums.firstObject as? PHAssetCollection else { return }
+                let options = PHFetchOptions()
+                let pred = NSPredicate(format: "mediaType = %@", NSNumber(integer:PHAssetMediaType.Image.rawValue))
+                options.predicate = pred
+                
+                let results = PHAsset.fetchAssetsInAssetCollection(rec, options: options)
+                
+                results.enumerateObjectsUsingBlock { result, index, _ in
+                    let asset = result as! PHAsset
+                    self.assets.insert(asset, atIndex: 0)
+                }
+                
+                self.photos = [UIImage?](count: self.assets.count, repeatedValue: nil)
+                
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.collectionView.reloadData()
+                })
+            case .Restricted:
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.dismiss()
+                })
+            case .Denied:
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.dismiss()
+                })
+            default:
+                // place for .NotDetermined - in this callback status is already determined so should never get here
+                break
+            }
         }
-        
-        photos = [UIImage?](count: assets.count, repeatedValue: nil)
-        
-        collectionView.reloadData()
     }
 }
 
@@ -213,13 +231,13 @@ extension PickerViewController: UITableViewDelegate, UITableViewDataSource {
                     for index in selectedImagesIndex {
                         // cellforItemAtIndexPath 只能返回在屏幕内的 cell
                         /*
-                        if let cell = collectionView.cellForItemAtIndexPath(index) as? PickerCell,
-                            let image = cell.imageView.image {
-                            selectedImages.append(image)
-                            
-                            print(index)
-                        }
-                        */
+                         if let cell = collectionView.cellForItemAtIndexPath(index) as? PickerCell,
+                         let image = cell.imageView.image {
+                         selectedImages.append(image)
+                         
+                         print(index)
+                         }
+                         */
                         
                         selectedImages.append(photos[index.item]!)
                     }
@@ -291,9 +309,9 @@ extension PickerViewController: UICollectionViewDelegate, UICollectionViewDataSo
         if !collectionView!.selectionMode {
             collectionView!.selectionMode = true
             
-            self.collectionView?.heightConstraint?.constant = selectionModeSize.height
-            
             self.layout?.invalidateLayout()
+            
+            self.collectionView?.heightConstraint?.constant = selectionModeSize.height + 1 // plus 1 to avoid warnings on ip6sp
             
             self.layout?.itemSize = selectionModeSize
             
@@ -319,7 +337,7 @@ extension PickerViewController: UICollectionViewDelegate, UICollectionViewDataSo
                 
                 if !cell.selected {
                     
-                    // 用 uiview.animation 该 contentoffset 会有 bug 
+                    // 用 uiview.animation 该 contentoffset 会有 bug
                     
                     // self.collectionView?.contentOffset = CGPoint(x: CGFloat(max(0, min(8, CGFloat(indexPath.item) - 0.5))) * screenWidth/2, y: 0)
                     

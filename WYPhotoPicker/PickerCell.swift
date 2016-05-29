@@ -8,12 +8,12 @@
 
 import UIKit
 
-protocol PickerDelegate {
+protocol PickerDelegate: class {
     func invalidateLayout(cell: UICollectionViewCell)
 }
 
 class PickerCell: UICollectionViewCell {
-    var delegate: PickerDelegate?
+    weak var delegate: PickerDelegate?
     
     var imageView: UIImageView!
     
@@ -36,7 +36,7 @@ class PickerCell: UICollectionViewCell {
         willSet {
             // has to judje this
             if newValue != selected {
-               delegate?.invalidateLayout(self)
+                delegate?.invalidateLayout(self)
             }
         }
     }
