@@ -28,7 +28,11 @@ class ViewController: UIViewController {
         let vc = PickerViewController()
         vc.delegate = self
         
-        presentViewController(vc, animated: true, completion: nil)
+        vc.beginPickingPhotos { result in
+            if result {
+                self.presentViewController(vc, animated: true, completion: nil)
+            }
+        }
     }
 }
 

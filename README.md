@@ -1,4 +1,8 @@
+# WYPhotoPicker v0.3
 
+Fixed bugs and apis.
+
+TODO: we have animated the transition to view mode.
 
 # WYPhotoPicker v0.2
 

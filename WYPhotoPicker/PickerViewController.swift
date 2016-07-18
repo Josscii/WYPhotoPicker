@@ -13,7 +13,7 @@ let screenWidth = UIScreen.mainScreen().bounds.width
 let viewModeSize = CGSize(width: 86, height: 129)
 let selectionModeSize = CGSize(width: screenWidth/2, height: 232.5)
 
-protocol PickerPhotoDelegate:class {
+protocol PickerPhotoDelegate: class {
     func didSelectImages(images: [UIImage])
 }
 
@@ -32,14 +32,47 @@ class PickerViewController: UIViewController {
     init() {
         super.init(nibName: nil, bundle: nil)
         
+        // custom transition
         transitionDelegate = PickerTransitionDelegate()
         transitioningDelegate = transitionDelegate
-        
         modalPresentationStyle = .Custom
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func beginPickingPhotos(authorizationResult: Bool -> ()) {
+        PHPhotoLibrary.requestAuthorization { status in
+            switch status {
+            case .Authorized:
+                let albums = PHAssetCollection.fetchAssetCollectionsWithType(.SmartAlbum, subtype: .SmartAlbumUserLibrary, options: nil)
+                guard let rec = albums.firstObject as? PHAssetCollection else { return }
+                let options = PHFetchOptions()
+                let pred = NSPredicate(format: "mediaType = %@", NSNumber(integer:PHAssetMediaType.Image.rawValue))
+                options.predicate = pred
+                
+                let results = PHAsset.fetchAssetsInAssetCollection(rec, options: options)
+                
+                results.enumerateObjectsUsingBlock { result, index, _ in
+                    let asset = result as! PHAsset
+                    self.assets.insert(asset, atIndex: 0)
+                }
+                
+                self.photos = [UIImage?](count: self.assets.count, repeatedValue: nil)
+                
+                dispatch_async(dispatch_get_main_queue(), { 
+                    authorizationResult(true)
+                })
+            case .Restricted, .Denied:
+                dispatch_async(dispatch_get_main_queue(), {
+                    authorizationResult(false)
+                })
+            default:
+                // place for .NotDetermined - in this callback status is already determined so should never get here
+                break
+            }
+        }
     }
     
     override func viewDidLoad() {
@@ -49,8 +82,11 @@ class PickerViewController: UIViewController {
         view.backgroundColor = UIColor.clearColor()
         
         configureLayout()
-        
-        fetchAllPhotos()
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        self.collectionView.reloadData()
     }
     
     func configureLayout() {
@@ -115,43 +151,6 @@ class PickerViewController: UIViewController {
         
         collectionView.heightConstraint?.active = true
     }
-    
-    func fetchAllPhotos() {
-        PHPhotoLibrary.requestAuthorization { status in
-            switch status {
-            case .Authorized:
-                let albums = PHAssetCollection.fetchAssetCollectionsWithType(.SmartAlbum, subtype: .SmartAlbumUserLibrary, options: nil)
-                guard let rec = albums.firstObject as? PHAssetCollection else { return }
-                let options = PHFetchOptions()
-                let pred = NSPredicate(format: "mediaType = %@", NSNumber(integer:PHAssetMediaType.Image.rawValue))
-                options.predicate = pred
-                
-                let results = PHAsset.fetchAssetsInAssetCollection(rec, options: options)
-                
-                results.enumerateObjectsUsingBlock { result, index, _ in
-                    let asset = result as! PHAsset
-                    self.assets.insert(asset, atIndex: 0)
-                }
-                
-                self.photos = [UIImage?](count: self.assets.count, repeatedValue: nil)
-                
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.collectionView.reloadData()
-                })
-            case .Restricted:
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.dismiss()
-                })
-            case .Denied:
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.dismiss()
-                })
-            default:
-                // place for .NotDetermined - in this callback status is already determined so should never get here
-                break
-            }
-        }
-    }
 }
 
 extension PickerViewController: UITableViewDelegate, UITableViewDataSource {
@@ -206,7 +205,11 @@ extension PickerViewController: UITableViewDelegate, UITableViewDataSource {
                 let picker = UIImagePickerController()
                 picker.sourceType = .PhotoLibrary
                 picker.delegate = self
-                presentViewController(picker, animated: true, completion: nil)
+                dismissViewControllerAnimated(true, completion: nil)
+                
+                guard let delegateVC = delegate as? UIViewController else { return }
+                
+                delegateVC.presentViewController(picker, animated: true, completion: nil)
             case 1:
                 let cam = UIImagePickerControllerSourceType.Camera
                 let ok = UIImagePickerController.isSourceTypeAvailable(cam)
@@ -272,12 +275,10 @@ extension PickerViewController: UIImagePickerControllerDelegate, UINavigationCon
         
         delegate?.didSelectImages([image])
         
-        dismissViewControllerAnimated(true, completion: nil)
         dismiss()
     }
     
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        dismissViewControllerAnimated(true, completion: nil)
         dismiss()
     }
 }
@@ -352,6 +353,6 @@ extension PickerViewController: UICollectionViewDelegate, UICollectionViewDataSo
 
 extension PickerViewController {
     func dismiss() {
-        self.dismissViewControllerAnimated(true, completion: nil)
+        dismissViewControllerAnimated(true, completion: nil)
     }
 }
