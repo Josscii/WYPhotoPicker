@@ -1,8 +1,14 @@
+# WYPhotoPicker v0.4
+
+1. Token my a lot of time to try to animate from viewmode to selection mode (about two days). Thanks [this project](https://github.com/lincf0912/ImagePickerSheetViewController) help me find how to do it.
+2. Now the requested images are keeping it's ratio, but the image size still need to tweek.
+3. Codes is a mess, try to rethink how to manage to code.
+
 # WYPhotoPicker v0.3
 
-Fixed bugs and apis.
+Fixed bugs and APIs.
 
-TODO: we have animated the transition to view mode.
+TODO: we have to animate the transition to selection mode.
 
 # WYPhotoPicker v0.2
 
