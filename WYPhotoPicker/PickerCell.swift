@@ -20,12 +20,15 @@ class PickerCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        imageView = UIImageView(frame: CGRect(x: 1, y: 1, width: bounds.width - 2, height: bounds.height - 2))
+        imageView = UIImageView()
         imageView.contentMode = .ScaleAspectFill
-        imageView.clipsToBounds = true
-        imageView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
         contentView.addSubview(imageView)
-        backgroundColor = .whiteColor()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        imageView.frame = contentView.bounds
     }
     
     required init?(coder aDecoder: NSCoder) {

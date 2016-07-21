@@ -20,7 +20,7 @@ protocol PickerPhotoDelegate: class {
 class PickerViewController: UIViewController {
     var collectionView: PickerCollectionView!
     var tableView: UITableView!
-    var layout: PickerLayout?
+    var layout: NewPickerLayout?
     
     var assets = [PHAsset]()
     var photos = [UIImage?]()
@@ -36,23 +36,43 @@ class PickerViewController: UIViewController {
         transitionDelegate = PickerTransitionDelegate()
         transitioningDelegate = transitionDelegate
         modalPresentationStyle = .Custom
+        layout = NewPickerLayout()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    var widths: [CGFloat] = []
+    
+    var selectionModeHeight: CGFloat = 232.5
+    var viewModeHeight: CGFloat = 191
+    
+    let scale = UIScreen.mainScreen().scale
+    
+    func targetSizeForAsset(asset: PHAsset) -> CGSize {
+        
+        let width = CGFloat(asset.pixelWidth) / scale
+        let height = CGFloat(asset.pixelHeight) / scale
+        
+        let ratio = width / height
+        
+        let targetHeight = (collectionView.selectionMode ? selectionModeHeight : viewModeHeight) - 10
+        
+        return CGSize(width: targetHeight  * ratio, height: targetHeight)
+    }
+    
     func beginPickingPhotos(authorizationResult: Bool -> ()) {
+        
         PHPhotoLibrary.requestAuthorization { status in
             switch status {
             case .Authorized:
-                let albums = PHAssetCollection.fetchAssetCollectionsWithType(.SmartAlbum, subtype: .SmartAlbumUserLibrary, options: nil)
-                guard let rec = albums.firstObject as? PHAssetCollection else { return }
+                
                 let options = PHFetchOptions()
                 let pred = NSPredicate(format: "mediaType = %@", NSNumber(integer:PHAssetMediaType.Image.rawValue))
                 options.predicate = pred
                 
-                let results = PHAsset.fetchAssetsInAssetCollection(rec, options: options)
+                let results = PHAsset.fetchAssetsWithOptions(options)
                 
                 results.enumerateObjectsUsingBlock { result, index, _ in
                     let asset = result as! PHAsset
@@ -61,7 +81,7 @@ class PickerViewController: UIViewController {
                 
                 self.photos = [UIImage?](count: self.assets.count, repeatedValue: nil)
                 
-                dispatch_async(dispatch_get_main_queue(), { 
+                dispatch_async(dispatch_get_main_queue(), {
                     authorizationResult(true)
                 })
             case .Restricted, .Denied:
@@ -82,11 +102,6 @@ class PickerViewController: UIViewController {
         view.backgroundColor = UIColor.clearColor()
         
         configureLayout()
-    }
-    
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
-        self.collectionView.reloadData()
     }
     
     func configureLayout() {
@@ -113,11 +128,6 @@ class PickerViewController: UIViewController {
             tableView.cellLayoutMarginsFollowReadableWidth = false
         }
         
-        layout = PickerLayout()
-        layout?.itemSize = viewModeSize
-        layout?.scrollDirection = .Horizontal
-        layout?.minimumLineSpacing = 0
-        
         collectionView = PickerCollectionView(frame: CGRect.zero, collectionViewLayout: layout!)
         collectionView?.delegate = self
         collectionView?.dataSource = self
@@ -127,7 +137,7 @@ class PickerViewController: UIViewController {
         collectionView?.allowsMultipleSelection = true
         collectionView?.showsVerticalScrollIndicator = false
         collectionView?.showsHorizontalScrollIndicator = false
-        
+
         for subview in [tableView, collectionView] {
             subview.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subview)
@@ -143,11 +153,10 @@ class PickerViewController: UIViewController {
         
         NSLayoutConstraint(item: tableView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1, constant: 150).active = true
         
-        // collectionview
-        
+        // collectionview 
         NSLayoutConstraint(item: collectionView, attribute: .Bottom, relatedBy: .Equal, toItem: tableView, attribute: .Top, multiplier: 1, constant: 0).active = true
         
-        collectionView.heightConstraint = NSLayoutConstraint(item: collectionView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1, constant: viewModeSize.height)
+        collectionView.heightConstraint = NSLayoutConstraint(item: collectionView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1, constant: viewModeHeight)
         
         collectionView.heightConstraint?.active = true
     }
@@ -283,27 +292,51 @@ extension PickerViewController: UIImagePickerControllerDelegate, UINavigationCon
     }
 }
 
-extension PickerViewController: UICollectionViewDelegate, UICollectionViewDataSource, PickerDelegate {
+extension PickerViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.assets.count
+        return assets.count
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("cell", forIndexPath: indexPath) as! PickerCell
         
-        cell.delegate = self
         let asset = assets[indexPath.item]
         
-        PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: selectionModeSize, contentMode: .AspectFit, options: nil) { image, _ in
+        cell.delegate = self
+        
+        let option = PHImageRequestOptions()
+        option.resizeMode = .Exact
+    
+        PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: self.targetSizeForAsset(asset), contentMode: .Default, options: option) {
+            (image, info) -> Void in
+            // what you want to do with the image here
             
-            cell.imageView.image = image
-            self.photos[indexPath.row] = image
+            if info!["PHImageResultIsDegradedKey"]?.integerValue == 0 {
+                // print("Result Size Is \(image!.size)")
+                
+                self.photos[indexPath.row] = image
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), { 
+                cell.imageView.image = image
+            })
         }
         
         return cell
     }
-    
+}
+
+extension PickerViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        
+        let asset = self.assets[indexPath.row]
+        
+        return targetSizeForAsset(asset)
+    }
+}
+
+extension PickerViewController: PickerDelegate {
     func invalidateLayout(cell: UICollectionViewCell) {
         tableView.reloadData()
         
@@ -311,42 +344,39 @@ extension PickerViewController: UICollectionViewDelegate, UICollectionViewDataSo
             collectionView!.selectionMode = true
             
             self.layout?.invalidateLayout()
-            
-            self.collectionView?.heightConstraint?.constant = selectionModeSize.height + 1 // plus 1 to avoid warnings on ip6sp
-            
-            self.layout?.itemSize = selectionModeSize
-            
-            // an workaround
-            self.collectionView.contentSize = CGSize(width: selectionModeSize.width * CGFloat(assets.count), height: selectionModeSize.height)
-            
-            if let indexPath = collectionView?.indexPathForCell(cell) {
-                if !cell.selected {
-                    
-                    // an workaround
-                    let offset = CGPoint(x: CGFloat(max(0, min(CGFloat(self.assets.count - 2), CGFloat(indexPath.item) - 0.5))) * screenWidth/2, y: 0)
-                    
-                    self.collectionView?.contentOffset = offset
+            UIView.animateWithDuration(0.3, animations: { 
+                self.collectionView?.heightConstraint?.constant = selectionModeSize.height + 1 // plus 1 to avoid warnings on ip6sp
+                
+                if let indexPath = self.collectionView?.indexPathForCell(cell) {
+                    if !cell.selected {
+                        // an workaround
+                        let offset = CGPoint(x: CGFloat(max(0, min(CGFloat(self.assets.count - 2), CGFloat(indexPath.item) - 0.5))) * screenWidth/2, y: 0)
+                        
+                        self.collectionView?.contentOffset = offset
+                    }
                 }
-            }
+                
+                self.collectionView?.layoutIfNeeded()
+            }, completion: { _ in
+                self.layout?.invalidateLayout()
+            })
             
             tableView.reloadData()
         } else {
             
             layout?.invalidateLayout()
-            
             if let indexPath = collectionView?.indexPathForCell(cell) {
-                
+
                 if !cell.selected {
+                    // 用 uiview.animation 改 contentoffset 会有 bug
                     
-                    // 用 uiview.animation 该 contentoffset 会有 bug
-                    
-                    // self.collectionView?.contentOffset = CGPoint(x: CGFloat(max(0, min(8, CGFloat(indexPath.item) - 0.5))) * screenWidth/2, y: 0)
-                    
-                    collectionView?.scrollToItemAtIndexPath(indexPath, atScrollPosition: .CenteredHorizontally, animated: true)
+                    if indexPath.item == 0 && collectionView.contentOffset.x == 0 {
+                        // do nothing
+                    } else {
+                        collectionView?.scrollToItemAtIndexPath(indexPath, atScrollPosition: .CenteredHorizontally, animated: true)
+                    }
                 }
-                
             }
-            
         }
     }
 }

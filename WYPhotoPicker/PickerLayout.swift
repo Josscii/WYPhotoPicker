@@ -27,59 +27,98 @@ class PickerLayoutAttributes: UICollectionViewLayoutAttributes {
     }
 }
 
-
-class PickerLayout: UICollectionViewFlowLayout {
+class NewPickerLayout: UICollectionViewFlowLayout {
+    
+    // initializers
     
     override init() {
         super.init()
+        
+        scrollDirection = .Horizontal
+        minimumInteritemSpacing = 5
+        sectionInset.left = 5
+        sectionInset.right = 5
         
         registerClass(PickerBadgeCell.self, forDecorationViewOfKind: "badge")
     }
     
     required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+        fatalError("init(coder:) has not been implemented")
     }
+    
+    // constants
     
     var offsetX: CGFloat {
         return collectionView!.contentOffset.x
     }
     
+    var numberOfItems: Int {
+        return collectionView!.numberOfItemsInSection(0)
+    }
+    
     let badgeSize = CGSize(width: 31, height: 31)
     
+    // layout methods
+    
+    var cache = [UICollectionViewLayoutAttributes]()
+    
+    override func prepareLayout() {
+        super.prepareLayout()
+        
+        cache.removeAll()
+        
+        guard let collectionView = collectionView as? PickerCollectionView else { return }
+        
+        if !collectionView.selectionMode { return }
+        
+        for item in 0 ..< numberOfItems {
+            let indexPath = NSIndexPath(forItem: item, inSection: 0)
+            let attr = layoutAttributesForDecorationViewOfKind("badge", atIndexPath: indexPath)!
+            cache.append(attr)
+        }
+    }
+    
     override func layoutAttributesForElementsInRect(rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        var layoutAttributes = super.layoutAttributesForElementsInRect(rect) as! [PickerLayoutAttributes]
+        var layoutAttributes = super.layoutAttributesForElementsInRect(rect)!
         
-        var badgeAttributes = [PickerLayoutAttributes]()
-        
-        for attributes in layoutAttributes {
-            
-            if let collectionView = collectionView as? PickerCollectionView,
-                cell = collectionView.cellForItemAtIndexPath(attributes.indexPath)  {
-                
-                if collectionView.selectionMode {
-                    
-                    let attr = PickerLayoutAttributes(forDecorationViewOfKind: "badge", withIndexPath: attributes.indexPath)
-                    
-                    attr.selected = cell.selected
-                    
-                    let offset = attributes.frame.origin.x - offsetX
-                    
-                    var frame = CGRect(x: attributes.frame.maxX - badgeSize.width, y: itemSize.height - badgeSize.height, width: badgeSize.width, height: badgeSize.height)
-                    
-                    if offset > 0.5 * screenWidth && offset < screenWidth {
-                        frame.origin.x = max(attributes.frame.minX, attributes.frame.minX + (screenWidth - offset) - badgeSize.width)
-                    }
-                    
-                    attr.frame = frame
-                    
-                    badgeAttributes.append(attr)
-                }
+        for attributes in cache {
+            if CGRectIntersectsRect(attributes.frame, rect) {
+                layoutAttributes.append(attributes)
             }
         }
         
-        layoutAttributes.appendContentsOf(badgeAttributes)
-        
         return layoutAttributes
+    }
+    
+    override func layoutAttributesForDecorationViewOfKind(elementKind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+        
+        let cellAttribute = layoutAttributesForItemAtIndexPath(indexPath)!
+        
+        // add decoration
+        let decorationAttribute = PickerLayoutAttributes(forDecorationViewOfKind: elementKind, withIndexPath: indexPath)
+        
+        let screenRightEdgeX = offsetX + screenWidth
+        
+        let decorationOrignX = max(cellAttribute.frame.minX, min(screenRightEdgeX - badgeSize.width, cellAttribute.frame.maxX - badgeSize.width))
+        
+        let frame = CGRect(x: decorationOrignX, y: cellAttribute.frame.maxY - badgeSize.height, width: badgeSize.width, height: badgeSize.height)
+        
+        if let cell = collectionView!.cellForItemAtIndexPath(indexPath) as? PickerCell {
+            decorationAttribute.selected = cell.selected
+        }
+        
+        decorationAttribute.frame = frame
+        decorationAttribute.zIndex = 1
+        
+        return decorationAttribute
+    }
+    
+    override func initialLayoutAttributesForAppearingItemAtIndexPath(itemIndexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+        return layoutAttributesForItemAtIndexPath(itemIndexPath)
+    }
+    
+    override func finalLayoutAttributesForDisappearingItemAtIndexPath(itemIndexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+        return layoutAttributesForItemAtIndexPath(itemIndexPath)
     }
     
     override func shouldInvalidateLayoutForBoundsChange(newBounds: CGRect) -> Bool {
