@@ -8,13 +8,7 @@
 
 import UIKit
 
-protocol PickerDelegate: class {
-    func invalidateLayout(cell: UICollectionViewCell)
-}
-
 class PickerCell: UICollectionViewCell {
-    weak var delegate: PickerDelegate?
-    
     var imageView: UIImageView!
     
     override init(frame: CGRect) {
@@ -33,14 +27,5 @@ class PickerCell: UICollectionViewCell {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    override var selected: Bool {
-        willSet {
-            // has to judje this
-            if newValue != selected {
-                delegate?.invalidateLayout(self)
-            }
-        }
     }
 }

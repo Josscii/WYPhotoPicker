@@ -10,8 +10,8 @@ import UIKit
 import Photos
 
 let screenWidth = UIScreen.mainScreen().bounds.width
-let viewModeSize = CGSize(width: 86, height: 129)
-let selectionModeSize = CGSize(width: screenWidth/2, height: 232.5)
+let selectionModeHeight: CGFloat = 232.5
+let viewModeHeight: CGFloat = 191
 
 protocol PickerPhotoDelegate: class {
     func didSelectImages(images: [UIImage])
@@ -20,10 +20,11 @@ protocol PickerPhotoDelegate: class {
 class PickerViewController: UIViewController {
     var collectionView: PickerCollectionView!
     var tableView: UITableView!
-    var layout: NewPickerLayout?
+    var layout: PickerLayout?
     
     var assets = [PHAsset]()
     var photos = [UIImage?]()
+    var widths = [CGFloat]()
     
     weak var delegate: PickerPhotoDelegate?
     
@@ -36,22 +37,17 @@ class PickerViewController: UIViewController {
         transitionDelegate = PickerTransitionDelegate()
         transitioningDelegate = transitionDelegate
         modalPresentationStyle = .Custom
-        layout = NewPickerLayout()
+        
+        // layout
+        layout = PickerLayout()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    var widths: [CGFloat] = []
-    
-    var selectionModeHeight: CGFloat = 232.5
-    var viewModeHeight: CGFloat = 191
-    
-    let scale = UIScreen.mainScreen().scale
-    
     func targetSizeForAsset(asset: PHAsset) -> CGSize {
-        
+        let scale = UIScreen.mainScreen().scale
         let width = CGFloat(asset.pixelWidth) / scale
         let height = CGFloat(asset.pixelHeight) / scale
         
@@ -59,7 +55,7 @@ class PickerViewController: UIViewController {
         
         let targetHeight = (collectionView.selectionMode ? selectionModeHeight : viewModeHeight) - 10
         
-        return CGSize(width: targetHeight  * ratio, height: targetHeight)
+        return CGSize(width: targetHeight * ratio, height: targetHeight)
     }
     
     func beginPickingPhotos(authorizationResult: Bool -> ()) {
@@ -80,6 +76,7 @@ class PickerViewController: UIViewController {
                 }
                 
                 self.photos = [UIImage?](count: self.assets.count, repeatedValue: nil)
+                self.widths = [CGFloat](count: self.assets.count, repeatedValue: 0)
                 
                 dispatch_async(dispatch_get_main_queue(), {
                     authorizationResult(true)
@@ -137,7 +134,7 @@ class PickerViewController: UIViewController {
         collectionView?.allowsMultipleSelection = true
         collectionView?.showsVerticalScrollIndicator = false
         collectionView?.showsHorizontalScrollIndicator = false
-
+        
         for subview in [tableView, collectionView] {
             subview.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subview)
@@ -153,7 +150,7 @@ class PickerViewController: UIViewController {
         
         NSLayoutConstraint(item: tableView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1, constant: 150).active = true
         
-        // collectionview 
+        // collectionview
         NSLayoutConstraint(item: collectionView, attribute: .Bottom, relatedBy: .Equal, toItem: tableView, attribute: .Top, multiplier: 1, constant: 0).active = true
         
         collectionView.heightConstraint = NSLayoutConstraint(item: collectionView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1, constant: viewModeHeight)
@@ -239,20 +236,8 @@ extension PickerViewController: UITableViewDelegate, UITableViewDataSource {
             case 0:
                 var selectedImages = [UIImage]()
                 
-                if let selectedImagesIndex = collectionView.indexPathsForSelectedItems() {
-                    for index in selectedImagesIndex {
-                        // cellforItemAtIndexPath 只能返回在屏幕内的 cell
-                        /*
-                         if let cell = collectionView.cellForItemAtIndexPath(index) as? PickerCell,
-                         let image = cell.imageView.image {
-                         selectedImages.append(image)
-                         
-                         print(index)
-                         }
-                         */
-                        
-                        selectedImages.append(photos[index.item]!)
-                    }
+                for index in collectionView.seletedIndexPaths {
+                    selectedImages.append(photos[index.item]!)
                 }
                 
                 delegate?.didSelectImages(selectedImages)
@@ -301,88 +286,89 @@ extension PickerViewController: UICollectionViewDelegate, UICollectionViewDataSo
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("cell", forIndexPath: indexPath) as! PickerCell
         
-        let asset = assets[indexPath.item]
-        
-        cell.delegate = self
-        
-        let option = PHImageRequestOptions()
-        option.resizeMode = .Exact
-    
-        PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: self.targetSizeForAsset(asset), contentMode: .Default, options: option) {
-            (image, info) -> Void in
-            // what you want to do with the image here
+        if let photo = photos[indexPath.row] {
+            cell.imageView.image = photo
+        } else {
+            let asset = assets[indexPath.item]
             
-            if info!["PHImageResultIsDegradedKey"]?.integerValue == 0 {
-                // print("Result Size Is \(image!.size)")
+            let option = PHImageRequestOptions()
+            option.resizeMode = .Exact
+            
+            var targetSize = targetSizeForAsset(asset)
+            targetSize.width *= 2
+            targetSize.height *= 2
+            
+            PHImageManager.defaultManager().requestImageForAsset(asset, targetSize: targetSize, contentMode: .Default, options: option) {
+                (image, info) -> Void in
+                // what you want to do with the image here
                 
-                self.photos[indexPath.row] = image
+                if info!["PHImageResultIsDegradedKey"]?.integerValue == 0 {
+                    self.photos[indexPath.row] = image
+                }
+                
+                dispatch_async(dispatch_get_main_queue(), {
+                    cell.imageView.image = image
+                })
             }
-            
-            dispatch_async(dispatch_get_main_queue(), { 
-                cell.imageView.image = image
-            })
         }
         
         return cell
+    }
+    
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        collectionView.deselectItemAtIndexPath(indexPath, animated: false)
+        layout?.toCenterIndexPath = indexPath
+        tableView.reloadData()
+        
+        if self.collectionView.seletedIndexPaths.contains(indexPath) {
+            self.collectionView.seletedIndexPaths.remove(indexPath)
+            layout?.invalidateLayout()
+        } else {
+            self.collectionView.seletedIndexPaths.append(indexPath)
+            
+            if !self.collectionView!.selectionMode {
+                self.collectionView!.selectionMode = true
+                
+                self.layout?.invalidateLayout()
+                UIView.animateWithDuration(0.3, animations: {
+                    self.collectionView?.heightConstraint?.constant = selectionModeHeight + 1 // plus 1 to avoid warnings on ip6sp
+                    self.collectionView?.layoutIfNeeded()
+                    }, completion: { _ in
+                        self.layout?.invalidateLayout()
+                })
+                
+                tableView.reloadData()
+            } else {
+                
+                layout?.invalidateLayout()
+                
+                self.collectionView?.scrollToItemAtIndexPath(indexPath, atScrollPosition: .CenteredHorizontally, animated: true)
+            }
+        }
     }
 }
 
 extension PickerViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         
-        let asset = self.assets[indexPath.row]
+        let asset = assets[indexPath.row]
+        let targetSize = targetSizeForAsset(asset)
+        widths[indexPath.row] = targetSize.width
         
-        return targetSizeForAsset(asset)
-    }
-}
-
-extension PickerViewController: PickerDelegate {
-    func invalidateLayout(cell: UICollectionViewCell) {
-        tableView.reloadData()
-        
-        if !collectionView!.selectionMode {
-            collectionView!.selectionMode = true
-            
-            self.layout?.invalidateLayout()
-            UIView.animateWithDuration(0.3, animations: { 
-                self.collectionView?.heightConstraint?.constant = selectionModeSize.height + 1 // plus 1 to avoid warnings on ip6sp
-                
-                if let indexPath = self.collectionView?.indexPathForCell(cell) {
-                    if !cell.selected {
-                        // an workaround
-                        let offset = CGPoint(x: CGFloat(max(0, min(CGFloat(self.assets.count - 2), CGFloat(indexPath.item) - 0.5))) * screenWidth/2, y: 0)
-                        
-                        self.collectionView?.contentOffset = offset
-                    }
-                }
-                
-                self.collectionView?.layoutIfNeeded()
-            }, completion: { _ in
-                self.layout?.invalidateLayout()
-            })
-            
-            tableView.reloadData()
-        } else {
-            
-            layout?.invalidateLayout()
-            if let indexPath = collectionView?.indexPathForCell(cell) {
-
-                if !cell.selected {
-                    // 用 uiview.animation 改 contentoffset 会有 bug
-                    
-                    if indexPath.item == 0 && collectionView.contentOffset.x == 0 {
-                        // do nothing
-                    } else {
-                        collectionView?.scrollToItemAtIndexPath(indexPath, atScrollPosition: .CenteredHorizontally, animated: true)
-                    }
-                }
-            }
-        }
+        return targetSize
     }
 }
 
 extension PickerViewController {
     func dismiss() {
         dismissViewControllerAnimated(true, completion: nil)
+    }
+}
+
+extension Array where Element: Equatable {
+    mutating func remove(element: Element) {
+        if let index = indexOf(element) {
+            removeAtIndex(index)
+        }
     }
 }

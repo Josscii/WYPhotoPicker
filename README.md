@@ -1,3 +1,16 @@
+# WYPhotoPicker v0.5
+
+oh~ finally almost fixed all bugs and improved much performance.
+
+As always, there is still something to fix:
+
+1. code base is still a mess, try to write code more beautiful.
+2. find more bugs when testing
+3. prepare to publish it to cocoa pods.
+4. write down all things when implement this project.
+
+thinks.
+
 # WYPhotoPicker v0.4
 
 1. Token my a lot of time to try to animate from viewmode to selection mode (about two days). Thanks [this project](https://github.com/lincf0912/ImagePickerSheetViewController) help me find how to do it.

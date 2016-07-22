@@ -27,7 +27,7 @@ class PickerLayoutAttributes: UICollectionViewLayoutAttributes {
     }
 }
 
-class NewPickerLayout: UICollectionViewFlowLayout {
+class PickerLayout: UICollectionViewFlowLayout {
     
     // initializers
     
@@ -57,6 +57,8 @@ class NewPickerLayout: UICollectionViewFlowLayout {
     }
     
     let badgeSize = CGSize(width: 31, height: 31)
+    
+    var toCenterIndexPath: NSIndexPath?
     
     // layout methods
     
@@ -103,8 +105,10 @@ class NewPickerLayout: UICollectionViewFlowLayout {
         
         let frame = CGRect(x: decorationOrignX, y: cellAttribute.frame.maxY - badgeSize.height, width: badgeSize.width, height: badgeSize.height)
         
-        if let cell = collectionView!.cellForItemAtIndexPath(indexPath) as? PickerCell {
-            decorationAttribute.selected = cell.selected
+        if let collectionView = collectionView as? PickerCollectionView {
+            if collectionView.seletedIndexPaths.contains(indexPath) {
+                decorationAttribute.selected = true
+            }
         }
         
         decorationAttribute.frame = frame
@@ -119,6 +123,23 @@ class NewPickerLayout: UICollectionViewFlowLayout {
     
     override func finalLayoutAttributesForDisappearingItemAtIndexPath(itemIndexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
         return layoutAttributesForItemAtIndexPath(itemIndexPath)
+    }
+    
+    override func targetContentOffsetForProposedContentOffset(proposedContentOffset: CGPoint) -> CGPoint {
+        var contentOffset = proposedContentOffset
+        
+        if let toCenterIndexPath = toCenterIndexPath {
+            let toCenteredCellAttributes = layoutAttributesForItemAtIndexPath(toCenterIndexPath)
+            let toCenteredCellFrame = toCenteredCellAttributes!.frame
+            
+            contentOffset.x = toCenteredCellFrame.midX - self.collectionView!.frame.width / 2
+            contentOffset.x = max(contentOffset.x, -self.sectionInset.left)
+            contentOffset.x = min(contentOffset.x, collectionViewContentSize().width - collectionView!.frame.width + sectionInset.right)
+        }
+        
+        toCenterIndexPath = nil
+        
+        return super.targetContentOffsetForProposedContentOffset(contentOffset)
     }
     
     override func shouldInvalidateLayoutForBoundsChange(newBounds: CGRect) -> Bool {

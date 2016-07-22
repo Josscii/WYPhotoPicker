@@ -11,4 +11,5 @@ import UIKit
 class PickerCollectionView: UICollectionView {
     var selectionMode = false
     var heightConstraint: NSLayoutConstraint?
+    var seletedIndexPaths = [NSIndexPath]()
 }
