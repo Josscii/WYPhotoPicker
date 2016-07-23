@@ -13,23 +13,25 @@ let screenWidth = UIScreen.mainScreen().bounds.width
 let selectionModeHeight: CGFloat = 232.5
 let viewModeHeight: CGFloat = 191
 
-protocol PickerPhotoDelegate: class {
-    func didSelectImages(images: [UIImage])
+protocol PickerViewControllerDeleage: class {
+    func didFinishPickingImages(images: [UIImage])
+    func didCancel()
 }
 
 class PickerViewController: UIViewController {
     var collectionView: PickerCollectionView!
+    var layout: PickerLayout!
     var tableView: UITableView!
-    var layout: PickerLayout?
     
     var assets = [PHAsset]()
     var photos = [UIImage?]()
     var widths = [CGFloat]()
     
-    weak var delegate: PickerPhotoDelegate?
+    weak var delegate: PickerViewControllerDeleage?
     
     var transitionDelegate: PickerTransitionDelegate?
     
+    // Life cycle
     init() {
         super.init(nibName: nil, bundle: nil)
         
@@ -46,6 +48,14 @@ class PickerViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = UIColor.clearColor()
+        
+        configureLayout()
+    }
+    
     func targetSizeForAsset(asset: PHAsset) -> CGSize {
         let scale = UIScreen.mainScreen().scale
         let width = CGFloat(asset.pixelWidth) / scale
@@ -58,12 +68,10 @@ class PickerViewController: UIViewController {
         return CGSize(width: targetHeight * ratio, height: targetHeight)
     }
     
-    func beginPickingPhotos(authorizationResult: Bool -> ()) {
-        
+    func startPickingPhotos(on: ViewController) {
         PHPhotoLibrary.requestAuthorization { status in
             switch status {
             case .Authorized:
-                
                 let options = PHFetchOptions()
                 let pred = NSPredicate(format: "mediaType = %@", NSNumber(integer:PHAssetMediaType.Image.rawValue))
                 options.predicate = pred
@@ -79,26 +87,22 @@ class PickerViewController: UIViewController {
                 self.widths = [CGFloat](count: self.assets.count, repeatedValue: 0)
                 
                 dispatch_async(dispatch_get_main_queue(), {
-                    authorizationResult(true)
+                    on.presentViewController(self, animated: true, completion: nil)
                 })
             case .Restricted, .Denied:
                 dispatch_async(dispatch_get_main_queue(), {
-                    authorizationResult(false)
+                    let alertAction = UIAlertAction(title: "好的", style: .Default, handler: nil)
+                    let alertController = UIAlertController(title: nil, message: "请在iPhone的“设置-隐私-相机”选项中，允许本应用访问你的相机", preferredStyle: .Alert)
+                    alertController.addAction(alertAction)
+                    on.presentViewController(alertController, animated: true, completion: nil)
+                    self.delegate?.didCancel()
                 })
+                break
             default:
                 // place for .NotDetermined - in this callback status is already determined so should never get here
                 break
             }
         }
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        view.backgroundColor = UIColor.clearColor()
-        
-        configureLayout()
     }
     
     func configureLayout() {
@@ -240,7 +244,7 @@ extension PickerViewController: UITableViewDelegate, UITableViewDataSource {
                     selectedImages.append(photos[index.item]!)
                 }
                 
-                delegate?.didSelectImages(selectedImages)
+                delegate?.didFinishPickingImages(selectedImages)
                 
                 dismissViewControllerAnimated(true, completion: nil)
             case 1:
@@ -267,7 +271,9 @@ extension PickerViewController: UIImagePickerControllerDelegate, UINavigationCon
         
         let image = info[UIImagePickerControllerOriginalImage] as! UIImage
         
-        delegate?.didSelectImages([image])
+        delegate?.didFinishPickingImages([image])
+        
+        print("???")
         
         dismiss()
     }

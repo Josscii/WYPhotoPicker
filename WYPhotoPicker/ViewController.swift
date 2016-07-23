@@ -28,16 +28,21 @@ class ViewController: UIViewController {
         let vc = PickerViewController()
         vc.delegate = self
         
-        vc.beginPickingPhotos { result in
-            if result {
-                self.presentViewController(vc, animated: true, completion: nil)
-            }
-        }
+//        vc.beginPickingPhotos { result in
+//            if result {
+//                self.presentViewController(vc, animated: true, completion: nil)
+//            }
+//        }
+        vc.startPickingPhotos(self)
     }
 }
 
-extension ViewController: PickerPhotoDelegate {
-    func didSelectImages(images: [UIImage]) {
+extension ViewController: PickerViewControllerDeleage {    
+    func didFinishPickingImages(images: [UIImage]) {
         imageView1.image = images[0]
+    }
+    
+    func didCancel() {
+        
     }
 }
