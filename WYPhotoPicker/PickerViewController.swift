@@ -9,16 +9,21 @@
 import UIKit
 import Photos
 
-let screenWidth = UIScreen.mainScreen().bounds.width
-let selectionModeHeight: CGFloat = 232.5
-let viewModeHeight: CGFloat = 191
+enum PickerConstants {
+    static let screenWidth = UIScreen.mainScreen().bounds.width
+    static let selectionModeHeight: CGFloat = 232.5
+    static let viewModeHeight: CGFloat = 191
+    static let pickerCellIdentifier = "PickerCell"
+}
 
-protocol PickerViewControllerDeleage: class {
+protocol PickerViewControllerDelegate: class {
     func didFinishPickingImages(images: [UIImage])
     func didCancel()
 }
 
 class PickerViewController: UIViewController {
+    // Properties
+    
     var collectionView: PickerCollectionView!
     var layout: PickerLayout!
     var tableView: UITableView!
@@ -27,11 +32,12 @@ class PickerViewController: UIViewController {
     var photos = [UIImage?]()
     var widths = [CGFloat]()
     
-    weak var delegate: PickerViewControllerDeleage?
+    weak var delegate: PickerViewControllerDelegate?
     
     var transitionDelegate: PickerTransitionDelegate?
     
     // Life cycle
+    
     init() {
         super.init(nibName: nil, bundle: nil)
         
@@ -56,17 +62,64 @@ class PickerViewController: UIViewController {
         configureLayout()
     }
     
-    func targetSizeForAsset(asset: PHAsset) -> CGSize {
-        let scale = UIScreen.mainScreen().scale
-        let width = CGFloat(asset.pixelWidth) / scale
-        let height = CGFloat(asset.pixelHeight) / scale
+    func configureLayout() {
+        // view for tap to dismiss
+        let tapView = UIView(frame: view.bounds)
+        tapView.backgroundColor = UIColor.clearColor()
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(dismiss))
+        tapView.addGestureRecognizer(gesture)
+        view.addSubview(tapView)
         
-        let ratio = width / height
+        // tableview
+        tableView = UITableView(frame: CGRect.zero, style: .Plain)
+        tableView.rowHeight = 50
+        tableView.scrollEnabled = false
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.registerClass(PickerTableViewCell.self, forCellReuseIdentifier: "cell1")
+        tableView.separatorInset = UIEdgeInsetsZero
+        tableView.layoutMargins = UIEdgeInsetsZero
         
-        let targetHeight = (collectionView.selectionMode ? selectionModeHeight : viewModeHeight) - 10
+        // iOS 9
+        if #available(iOS 9.0, *)
+        {
+            tableView.cellLayoutMarginsFollowReadableWidth = false
+        }
         
-        return CGSize(width: targetHeight * ratio, height: targetHeight)
+        collectionView = PickerCollectionView(frame: CGRect.zero, collectionViewLayout: layout!)
+        collectionView?.delegate = self
+        collectionView?.dataSource = self
+        collectionView?.registerClass(PickerCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView?.backgroundColor = UIColor.whiteColor()
+        
+        collectionView?.allowsMultipleSelection = true
+        collectionView?.showsVerticalScrollIndicator = false
+        collectionView?.showsHorizontalScrollIndicator = false
+        
+        for subview in [tableView, collectionView] {
+            subview.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(subview)
+            
+            NSLayoutConstraint(item: subview, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1, constant: 0).active = true
+            
+            NSLayoutConstraint(item: subview, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1, constant: 0).active = true
+        }
+        
+        // tableview
+        NSLayoutConstraint(item: tableView, attribute: .Bottom, relatedBy: .Equal, toItem: view, attribute: .Bottom, multiplier: 1, constant: 0).active = true
+        
+        NSLayoutConstraint(item: tableView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1, constant: 150).active = true
+        
+        // collectionview
+        NSLayoutConstraint(item: collectionView, attribute: .Bottom, relatedBy: .Equal, toItem: tableView, attribute: .Top, multiplier: 1, constant: 0).active = true
+        
+        collectionView.heightConstraint = NSLayoutConstraint(item: collectionView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1, constant: PickerConstants.viewModeHeight)
+        
+        collectionView.heightConstraint?.active = true
     }
+}
+
+extension PickerViewController {
     
     func startPickingPhotos(on: ViewController) {
         PHPhotoLibrary.requestAuthorization { status in
@@ -105,64 +158,20 @@ class PickerViewController: UIViewController {
         }
     }
     
-    func configureLayout() {
-        let tapView = UIView(frame: view.bounds)
-        tapView.backgroundColor = UIColor.clearColor()
-        let gesture = UITapGestureRecognizer(target: self, action: #selector(dismiss))
-        tapView.addGestureRecognizer(gesture)
+    func targetSizeForAsset(asset: PHAsset) -> CGSize {
+        let scale = UIScreen.mainScreen().scale
+        let width = CGFloat(asset.pixelWidth) / scale
+        let height = CGFloat(asset.pixelHeight) / scale
         
-        view.addSubview(tapView)
+        let ratio = width / height
         
-        tableView = UITableView(frame: CGRect.zero, style: .Plain)
-        tableView.rowHeight = 50
-        tableView.scrollEnabled = false
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.registerClass(PickerTableViewCell.self, forCellReuseIdentifier: "cell1")
+        let targetHeight = (collectionView.selectionMode ? PickerConstants.selectionModeHeight : PickerConstants.viewModeHeight) - 10
         
-        tableView.separatorInset = UIEdgeInsetsZero
-        tableView.layoutMargins = UIEdgeInsetsZero
-        
-        // iOS 9
-        if #available(iOS 9.0, *)
-        {
-            tableView.cellLayoutMarginsFollowReadableWidth = false
-        }
-        
-        collectionView = PickerCollectionView(frame: CGRect.zero, collectionViewLayout: layout!)
-        collectionView?.delegate = self
-        collectionView?.dataSource = self
-        collectionView?.registerClass(PickerCell.self, forCellWithReuseIdentifier: "cell")
-        collectionView?.backgroundColor = UIColor.whiteColor()
-        
-        collectionView?.allowsMultipleSelection = true
-        collectionView?.showsVerticalScrollIndicator = false
-        collectionView?.showsHorizontalScrollIndicator = false
-        
-        for subview in [tableView, collectionView] {
-            subview.translatesAutoresizingMaskIntoConstraints = false
-            view.addSubview(subview)
-            
-            NSLayoutConstraint(item: subview, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1, constant: 0).active = true
-            
-            NSLayoutConstraint(item: subview, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1, constant: 0).active = true
-        }
-        
-        // tableview
-        
-        NSLayoutConstraint(item: tableView, attribute: .Bottom, relatedBy: .Equal, toItem: view, attribute: .Bottom, multiplier: 1, constant: 0).active = true
-        
-        NSLayoutConstraint(item: tableView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1, constant: 150).active = true
-        
-        // collectionview
-        NSLayoutConstraint(item: collectionView, attribute: .Bottom, relatedBy: .Equal, toItem: tableView, attribute: .Top, multiplier: 1, constant: 0).active = true
-        
-        collectionView.heightConstraint = NSLayoutConstraint(item: collectionView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1, constant: viewModeHeight)
-        
-        collectionView.heightConstraint?.active = true
+        return CGSize(width: targetHeight * ratio, height: targetHeight)
     }
 }
 
+// MARK: tableview delegate and datasource
 extension PickerViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 3
@@ -266,14 +275,13 @@ extension PickerViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+// MARK: imagePikerdelegate
 extension PickerViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
         
         let image = info[UIImagePickerControllerOriginalImage] as! UIImage
         
         delegate?.didFinishPickingImages([image])
-        
-        print("???")
         
         dismiss()
     }
@@ -337,7 +345,7 @@ extension PickerViewController: UICollectionViewDelegate, UICollectionViewDataSo
                 
                 self.layout?.invalidateLayout()
                 UIView.animateWithDuration(0.3, animations: {
-                    self.collectionView?.heightConstraint?.constant = selectionModeHeight + 1 // plus 1 to avoid warnings on ip6sp
+                    self.collectionView?.heightConstraint?.constant = PickerConstants.selectionModeHeight + 1 // plus 1 to avoid warnings on ip6sp
                     self.collectionView?.layoutIfNeeded()
                     }, completion: { _ in
                         self.layout?.invalidateLayout()

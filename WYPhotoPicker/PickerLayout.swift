@@ -99,7 +99,7 @@ class PickerLayout: UICollectionViewFlowLayout {
         // add decoration
         let decorationAttribute = PickerLayoutAttributes(forDecorationViewOfKind: elementKind, withIndexPath: indexPath)
         
-        let screenRightEdgeX = offsetX + screenWidth
+        let screenRightEdgeX = offsetX + PickerConstants.screenWidth
         
         let decorationOrignX = max(cellAttribute.frame.minX, min(screenRightEdgeX - badgeSize.width, cellAttribute.frame.maxX - badgeSize.width))
         
