@@ -26,7 +26,7 @@ class ViewController: UIViewController {
     @IBAction func present(sender: AnyObject) {
         
         let vc = PickerViewController()
-        vc.delegate = self
+        // vc.delegate = self
         vc.startPickingPhotos(self)
     }
 }
@@ -38,5 +38,18 @@ extension ViewController: PickerViewControllerDelegate {
     
     func didCancel() {
         
+    }
+    
+    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
+        
+        let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+        
+        imageView1.image = image
+        
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
+        dismissViewControllerAnimated(true, completion: nil)
     }
 }

@@ -16,7 +16,8 @@ enum PickerConstants {
     static let pickerCellIdentifier = "PickerCell"
 }
 
-protocol PickerViewControllerDelegate: class {
+@objc
+protocol PickerViewControllerDelegate: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func didFinishPickingImages(images: [UIImage])
     func didCancel()
 }
@@ -122,6 +123,7 @@ class PickerViewController: UIViewController {
 extension PickerViewController {
     
     func startPickingPhotos(on: ViewController) {
+        delegate = on
         PHPhotoLibrary.requestAuthorization { status in
             switch status {
             case .Authorized:
@@ -223,7 +225,7 @@ extension PickerViewController: UITableViewDelegate, UITableViewDataSource {
             case 0:
                 let picker = UIImagePickerController()
                 picker.sourceType = .PhotoLibrary
-                picker.delegate = self
+                picker.delegate = delegate!
                 dismissViewControllerAnimated(true, completion: nil)
                 
                 guard let delegateVC = delegate as? UIViewController else { return }
@@ -239,7 +241,7 @@ extension PickerViewController: UITableViewDelegate, UITableViewDataSource {
                 
                 let picker = UIImagePickerController()
                 picker.sourceType = .Camera
-                picker.delegate = self
+                picker.delegate = delegate!
                 presentViewController(picker, animated: true, completion: nil)
             default:
                 dismissViewControllerAnimated(true, completion: nil)
